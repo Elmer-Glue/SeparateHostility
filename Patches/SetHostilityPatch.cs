@@ -1,28 +1,18 @@
 ﻿using System.Linq;
-using System.Reflection;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
-using SPT.Reflection.Patching;
 
-namespace PleaseJustFight.Patches;
+namespace SeparateHostility.Patches;
 
-public class SetHostilityPatch : ModulePatch
+[HarmonyPatch]
+internal class SetHostilityPatch
 {
-    protected override MethodBase GetTargetMethod()
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(BotOwner), nameof(BotOwner.method_10))]
+    internal static void OnPreActivate(BotOwner __instance)
     {
-        return AccessTools.Method(typeof(BotOwner), nameof(BotOwner.method_10));
-    }
-
-    [PatchPostfix]
-    private static void PatchPostfix(BotOwner __instance)
-    {
-        var role = __instance.Profile.Info?.Settings?.Role;
-        if (role is null) {
-            return;
-        }
-
-        switch (role) {
+        switch (__instance.Profile.Info.Settings.Role) {
             // pmc
             case WildSpawnType.pmcBEAR:
             case WildSpawnType.pmcUSEC:
@@ -86,7 +76,6 @@ public class SetHostilityPatch : ModulePatch
         }
     }
 
-    // Set pmc as hostile towards all other bots with some boss exceptions
     private static void SetAllAsEnemies(BotOwner newBot)
     {
         var humanPlayers = Singleton<GameWorld>.Instance.AllAlivePlayersList
@@ -96,39 +85,41 @@ public class SetHostilityPatch : ModulePatch
         }
 
         var activatedBots = Singleton<IBotGame>.Instance.BotsController.Bots.BotOwners
-            .Where(b => b.BotState == EBotState.Active && b.Profile.Id != newBot.Profile.Id);
+            .Where(b => b.BotState is not (EBotState.ActiveFail or EBotState.Disposed or EBotState.NonActive) &&
+                        b.Profile.Id != newBot.Profile.Id);
         foreach (var bot in activatedBots) {
-            switch (bot.Profile.Info?.Settings?.Role) {
+            switch (bot.Profile.Info.Settings.Role) {
                 case WildSpawnType.bossZryachiy:
                 case WildSpawnType.followerZryachiy:
                 case WildSpawnType.peacefullZryachiyEvent:
                 case WildSpawnType.shooterBTR:
                 case WildSpawnType.gifter:
-                case null:
                     continue;
             }
 
             bot.BotsGroup.AddEnemy(newBot, EBotEnemyCause.initial);
             newBot.BotsGroup.AddEnemy(bot, EBotEnemyCause.initial);
         }
+
+        foreach (var sameGroupMember in newBot.BotsGroup._members) {
+            newBot.BotsGroup.RemoveEnemy(sameGroupMember);
+        }
     }
 
-    // Set scavs and goons as hostile towards all pmc's
     private static void SetPmcAsEnemies(BotOwner newBot)
     {
         var humanPlayers = Singleton<GameWorld>.Instance.AllAlivePlayersList
             .Where(p => !p.IsAI);
         foreach (var humanPlayer in humanPlayers) {
-            // scavs run check
-            if (humanPlayer.Profile.Info?.Side is EPlayerSide.Usec or EPlayerSide.Bear) {
+            if (humanPlayer.Profile.Info.Side is EPlayerSide.Usec or EPlayerSide.Bear) {
                 newBot.BotsGroup.AddEnemy(humanPlayer, EBotEnemyCause.initial);
             }
         }
 
         var activatedBots = Singleton<IBotGame>.Instance.BotsController.Bots.BotOwners
-            .Where(b => b.BotState == EBotState.Active);
+            .Where(b => b.BotState is not (EBotState.ActiveFail or EBotState.Disposed or EBotState.NonActive));
         foreach (var bot in activatedBots) {
-            var role = bot.Profile.Info?.Settings?.Role;
+            var role = bot.Profile.Info.Settings.Role;
             if (role is not (WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR)) {
                 continue;
             }
