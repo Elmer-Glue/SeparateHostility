@@ -12,7 +12,7 @@ internal class ModInfo
 }
 
 [BepInPlugin(ModInfo.Guid, ModInfo.Name, ModInfo.Version)]
-[BepInDependency("com.SPT.custom", "3.11.0")]
+[BepInDependency("com.SPT.custom", "4.0.13")]
 public class ShMod : BaseUnityPlugin
 {
     private static ShMod? _instance;

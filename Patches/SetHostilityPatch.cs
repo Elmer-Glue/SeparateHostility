@@ -71,6 +71,10 @@ internal class SetHostilityPatch
             case WildSpawnType.infectedCivil:
             case WildSpawnType.infectedLaborant:
             case WildSpawnType.infectedTagilla:
+            // labyrinth
+            case WildSpawnType.bossTagillaAgro:
+            case WildSpawnType.bossKillaAgro:
+            case WildSpawnType.tagillaHelperAgro:
                 SetPmcAsEnemies(__instance);
                 break;
         }
@@ -101,7 +105,7 @@ internal class SetHostilityPatch
             newBot.BotsGroup.AddEnemy(bot, EBotEnemyCause.initial);
         }
 
-        foreach (var sameGroupMember in newBot.BotsGroup._members) {
+        foreach (var sameGroupMember in newBot.BotsGroup.Members) {
             newBot.BotsGroup.RemoveEnemy(sameGroupMember);
         }
     }
