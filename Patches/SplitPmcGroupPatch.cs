@@ -21,8 +21,8 @@ internal class SplitPmcGroupPatch
 
         var spawn = bot.SpawnProfileData.SpawnParams;
         if (!manager._spawnGroups.TryGetValue(spawn, out var group)) {
-            group = manager._spawnGroups[spawn] = new(zone, __instance.BotGame, bot, [], __instance._deadBodiesController,
-                __instance._allPlayers, true) {
+            group = manager._spawnGroups[spawn] = new(zone, __instance.BotGame, bot, [], __instance.DeadBodiesController,
+                __instance.AllPlayers, true) {
                 TargetMembersCount = bot.SpawnProfileData.SpawnParams.ShallBeGroup.StartCount,
             };
             ShMod.Log($"creating new group for {bot.Profile.Nickname} | {group.GetHashCode()}");

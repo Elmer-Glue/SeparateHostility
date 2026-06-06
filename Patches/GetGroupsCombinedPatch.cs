@@ -8,8 +8,8 @@ namespace SeparateHostility.Patches;
 internal class GetGroupsCombinedPatch
 {
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(GClass555), nameof(GClass555.GetGroups))]
-    internal static void OnGetGroups(GClass555 __instance, HashSet<BotsGroup> __result)
+    [HarmonyPatch(typeof(GClass575), nameof(GClass575.GetGroups))]
+    internal static void OnGetGroups(GClass575 __instance, HashSet<BotsGroup> __result)
     {
         if (__instance is BotsGroupManager manager) {
             __result.UnionWith(manager._spawnGroups.Values);
