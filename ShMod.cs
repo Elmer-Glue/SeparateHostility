@@ -8,7 +8,7 @@ internal class ModInfo
 {
     internal const string Guid = "dk.sptplugins.separatehostility";
     internal const string Name = "Separate Hostility";
-    internal const string Version = "1.0.0";
+    internal const string Version = "2.0.0";
 }
 
 [BepInPlugin(ModInfo.Guid, ModInfo.Name, ModInfo.Version)]
